@@ -10,7 +10,7 @@ uv sync
 
 ## Train
 
-Run with default parameters (aligned with the reference repo):
+Run the training script with:
 
 ```bash
 uv run -m hand_latent.train --num_steps 5000 --checkpoint_interval 1000
