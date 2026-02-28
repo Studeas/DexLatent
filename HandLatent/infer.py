@@ -37,7 +37,7 @@ class EvaluationConfig:
         Wrist rotation cost weight, shape=().
     """
 
-    ik_pink_arm_initial_iterations: int = 50
+    ik_pink_arm_initial_iterations: int = 100
     ik_pink_arm_iterations: int = 5
     ik_rotation_weight: float = 0.01
 
@@ -298,9 +298,11 @@ def decode_hand_sequence_eepose(
             pinch_pairs=pinch_pairs,
             pair_weights=weights_seed[0],
             rotation_weight=eval_config.ik_rotation_weight,
-            iterations=eval_config.ik_pink_arm_iterations
-            if (cached_arm is not None or frame_index > 0)
-            else eval_config.ik_pink_arm_initial_iterations,
+            iterations=(
+                eval_config.ik_pink_arm_initial_iterations
+                if frame_index == 0
+                else eval_config.ik_pink_arm_iterations
+            ),
         )
         arm_solutions[frame_index] = solved
         previous_arm = solved.detach()
