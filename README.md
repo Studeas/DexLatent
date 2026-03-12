@@ -1,6 +1,6 @@
 # DexLatent
 
-DexLatent implementation of the paper "Cross-Hand Latent Representation for Vision-Language-Action Models"
+DexLatent official implementation of the paper [XL-VLA (CVPR 2026)](https://xl-vla.github.io)
 
 ![teaser](Assets/videos/teaser.gif)
 
