@@ -2,6 +2,8 @@
 
 DexLatent implementation of the paper "Cross-Hand Latent Representation for Vision-Language-Action Models"
 
+![teaser](Assets/videos/teaser.gif)
+
 ## Install
 
 ```bash
