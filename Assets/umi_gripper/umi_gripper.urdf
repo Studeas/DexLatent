@@ -1,0 +1,268 @@
+<?xml version="1.0" ?>
+<robot name="converted_robot">
+   <!--generated with mjcf_urdf_simple_converter (https://github.com/Yasu31/mjcf_urdf_simple_converter)-->
+   <link name="world">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.0"/>
+         <inertia ixx="0.0" iyy="0.0" izz="0.0" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <link name="body_1">
+      <inertial>
+         <origin xyz="0.0015967979364567948 0.003504282015459275 0.02287166630407777" rpy="2.172631339574884 -1.5218897734899373 -0.4655564621157525"/>
+         <mass value="1.560126250423701"/>
+         <inertia ixx="0.005530705291902967" iyy="0.0040921097044483426" izz="0.0027242058202118437" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="base_link">
+         <origin xyz="0.00029036961018778486 0.009971136732595986 0.0249724306687446" rpy="0.11244518485826349 -1.473184401860941 1.4829997783243696"/>
+         <geometry>
+            <mesh filename="meshes/converted_base_link_ffffffff.obj"/>
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="0.00029036961018778486 0.009971136732595986 0.0249724306687446" rpy="0.11244518485826349 -1.473184401860941 1.4829997783243696"/>
+         <geometry>
+            <mesh filename="meshes/converted_base_link_ffffffff.obj"/>
+         </geometry>  
+      </collision>
+      <visual name="base_link">
+         <origin xyz="0.00029036961018778486 0.009971136732595986 0.0249724306687446" rpy="0.11244518485826349 -1.473184401860941 1.4829997783243696"/>
+         <geometry>
+            <mesh filename="meshes/converted_base_link_808080ff.obj"/>
+         </geometry>
+      </visual>
+      <visual name="gopro">
+         <origin xyz="0.018296779135748113 -0.07888114745584028 -0.003825781899764737" rpy="0.8735124240821344 1.478332652851687 -2.1979067150698626"/>
+         <geometry>
+            <mesh filename="meshes/converted_gopro_262626ff.obj"/>
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="0.018296779135748113 -0.07888114745584028 -0.003825781899764737" rpy="0.8735124240821344 1.478332652851687 -2.1979067150698626"/>
+         <geometry>
+            <mesh filename="meshes/converted_gopro_262626ff.obj"/>
+         </geometry>
+      </collision>
+      <visual name="gopro">
+         <origin xyz="0.018296779135748113 -0.07888114745584028 -0.003825781899764737" rpy="0.8735124240821344 1.478332652851687 -2.1979067150698626"/>
+         <geometry>
+            <mesh filename="meshes/converted_gopro_808080ff.obj"/>
+         </geometry>
+      </visual>
+   </link>
+   <link name="gripper_joint_x_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="prismatic" name="gripper_joint_x">
+      <parent link="world"/>
+      <child link="gripper_joint_x_jointbody"/>
+      <origin xyz="0.0 0.0 0.11" rpy="-1.5707963267948957 0.0 0.0"/>
+      <axis xyz="1.0 0.0 0.0"/>
+      <limit lower="-1.2" upper="1.2" effort="100" velocity="100"/>
+   </joint>
+   <link name="gripper_joint_y_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="prismatic" name="gripper_joint_y">
+      <parent link="gripper_joint_x_jointbody"/>
+      <child link="gripper_joint_y_jointbody"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <limit lower="-1.2" upper="1.2" effort="100" velocity="100"/>
+   </joint>
+   <link name="gripper_joint_z_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="prismatic" name="gripper_joint_z">
+      <parent link="gripper_joint_y_jointbody"/>
+      <child link="gripper_joint_z_jointbody"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <axis xyz="0.0 -1.0 0.0"/>
+      <limit lower="-1.2" upper="1.2" effort="100" velocity="100"/>
+   </joint>
+   <link name="gripper_joint_rx_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="revolute" name="gripper_joint_rx">
+      <parent link="gripper_joint_z_jointbody"/>
+      <child link="gripper_joint_rx_jointbody"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <axis xyz="1.0 0.0 0.0"/>
+      <limit lower="-31.415" upper="31.415" effort="100" velocity="100"/>
+   </joint>
+   <link name="gripper_joint_ry_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="revolute" name="gripper_joint_ry">
+      <parent link="gripper_joint_rx_jointbody"/>
+      <child link="gripper_joint_ry_jointbody"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <axis xyz="0.0 0.0 1.0"/>
+      <limit lower="-31.415" upper="31.415" effort="100" velocity="100"/>
+   </joint>
+   <link name="gripper_joint_rz_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="revolute" name="gripper_joint_rz">
+      <parent link="gripper_joint_ry_jointbody"/>
+      <child link="gripper_joint_rz_jointbody"/>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+      <axis xyz="0.0 -1.0 0.0"/>
+      <limit lower="-31.415" upper="31.415" effort="100" velocity="100"/>
+   </joint>
+   <joint type="fixed" name="gripper_joint_rz_offset">
+      <parent link="gripper_joint_rz_jointbody"/>
+      <child link="body_1"/>
+      <origin xyz="-0.0 -0.0 -0.0" rpy="0.0 0.0 0.0"/>
+   </joint>
+   <link name="left_finger_holder">
+      <inertial>
+         <origin xyz="-0.0613355 0.104073 -0.0013157" rpy="-1.1769009428563757 -1.3849810823943283 2.651450192417948"/>
+         <mass value="0.080081"/>
+         <inertia ixx="0.000104597" iyy="0.000102992" izz="1.90532e-05" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="left_finger_holder">
+         <origin xyz="-0.0644068409846553 0.08112333887204844 -3.970886106907814e-05" rpy="1.2330756448677436 -0.3780366056799709 0.2839660278519583"/>
+         <geometry>
+            <mesh filename="meshes/converted_left_finger_holder_ffffffff.obj"/>
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="-0.0644068409846553 0.08112333887204844 -3.970886106907814e-05" rpy="1.2330756448677436 -0.3780366056799709 0.2839660278519583"/>
+         <geometry>
+            <mesh filename="meshes/converted_left_finger_holder_ffffffff.obj"/>
+         </geometry>
+      </collision>
+      <visual name="left_finger_holder">
+         <origin xyz="-0.0644068409846553 0.08112333887204844 -3.970886106907814e-05" rpy="1.2330756448677436 -0.3780366056799709 0.2839660278519583"/>
+         <geometry>
+            <mesh filename="meshes/converted_left_finger_holder_808080ff.obj"/>
+         </geometry>
+      </visual>
+      <visual name="left_finger">
+         <origin xyz="-0.056436158389798194 0.12444200711018616 -0.002999999561905853" rpy="1.7143034299591546 1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="meshes/converted_left_finger_ebad3dff.obj"/>
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="-0.056436158389798194 0.12444200711018616 -0.002999999561905853" rpy="1.7143034299591546 1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="meshes/converted_left_finger_ebad3dff.obj"/>
+         </geometry>
+      </collision>
+      <visual name="left_finger">
+         <origin xyz="-0.056436158389798194 0.12444200711018616 -0.002999999561905853" rpy="1.7143034299591546 1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="meshes/converted_left_finger_808080ff.obj"/>
+         </geometry>
+      </visual>
+   </link>
+   <link name="left_finger_joint_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="prismatic" name="left_finger_joint">
+      <parent link="body_1"/>
+      <child link="left_finger_joint_jointbody"/>
+      <origin xyz="0.0 0.0 0.0" rpy="1.5707963267948963 0.0 0.0"/>
+      <axis xyz="1.0 0.0 0.0"/>
+      <limit lower="0.0" upper="0.0417" effort="100" velocity="100"/>
+   </joint>
+   <joint type="fixed" name="left_finger_joint_offset">
+      <parent link="left_finger_joint_jointbody"/>
+      <child link="left_finger_holder"/>
+      <origin xyz="-0.0 -0.0 -0.0" rpy="0.0 0.0 0.0"/>
+   </joint>
+   <link name="right_finger_holder">
+      <inertial>
+         <origin xyz="0.0613353 0.104073 -0.00131574" rpy="1.176946497676931 -1.384964732758037 0.49010502833437664"/>
+         <mass value="0.080081"/>
+         <inertia ixx="0.000104597" iyy="0.000102992" izz="1.90532e-05" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual name="right_finger_holder">
+         <origin xyz="0.06440684101505119 0.08112333885440705 -3.970884378333247e-05" rpy="1.2330756411339179 0.3780366247775515 -0.2839660331644219"/>
+         <geometry>
+            <mesh filename="meshes/converted_right_finger_holder_ffffffff.obj"/>
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="0.06440684101505119 0.08112333885440705 -3.970884378333247e-05" rpy="1.2330756411339179 0.3780366247775515 -0.2839660331644219"/>
+         <geometry>
+            <mesh filename="meshes/converted_right_finger_holder_ffffffff.obj"/>
+         </geometry>
+      </collision>
+      <visual name="right_finger_holder">
+         <origin xyz="0.06440684101505119 0.08112333885440705 -3.970884378333247e-05" rpy="1.2330756411339179 0.3780366247775515 -0.2839660331644219"/>
+         <geometry>
+            <mesh filename="meshes/converted_right_finger_holder_808080ff.obj"/>
+         </geometry>
+      </visual>
+      <visual name="right_finger">
+         <origin xyz="0.056436158389798194 0.12444200711018617 -0.0030000004380941452" rpy="1.7143034299591549 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="meshes/converted_right_finger_ebad3dff.obj"/>
+         </geometry>
+      </visual>
+      <collision>
+         <origin xyz="0.056436158389798194 0.12444200711018617 -0.0030000004380941452" rpy="1.7143034299591549 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="meshes/converted_right_finger_ebad3dff.obj"/>
+         </geometry>
+      </collision>
+      <visual name="right_finger">
+         <origin xyz="0.056436158389798194 0.12444200711018617 -0.0030000004380941452" rpy="1.7143034299591549 -1.5707963267948966 0.0"/>
+         <geometry>
+            <mesh filename="meshes/converted_right_finger_808080ff.obj"/>
+         </geometry>
+      </visual>
+   </link>
+   <link name="right_finger_joint_jointbody">
+      <inertial>
+         <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+         <mass value="0.001"/>
+         <inertia ixx="1e-09" iyy="1e-09" izz="1e-09" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+   </link>
+   <joint type="prismatic" name="right_finger_joint">
+      <parent link="body_1"/>
+      <child link="right_finger_joint_jointbody"/>
+      <origin xyz="0.0 0.0 0.0" rpy="1.5707963267948963 0.0 0.0"/>
+      <axis xyz="-1.0 0.0 0.0"/>
+      <limit lower="0.0" upper="0.0417" effort="100" velocity="100"/>
+      <mimic joint="left_finger_joint" multiplier="1.0" offset="0.0"/>
+   </joint>
+   <joint type="fixed" name="right_finger_joint_offset">
+      <parent link="right_finger_joint_jointbody"/>
+      <child link="right_finger_holder"/>
+      <origin xyz="-0.0 -0.0 -0.0" rpy="0.0 0.0 0.0"/>
+   </joint>
+</robot>

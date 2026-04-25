@@ -22,6 +22,7 @@ PROJECT_ROOT: str = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."
 ASSETS_DIR: str = os.path.join(PROJECT_ROOT, "Assets")
 
 HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
+    # ── xarm7 + xhand ──────────────────────────────────────────────────────
     "xarm7_xhand_left": {
         "urdf_path": os.path.join(ASSETS_DIR, "xarm7_xhand", "xarm7_xhand_left_hand.urdf"),
         "root_link": "link_base",
@@ -46,6 +47,7 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
             "right_hand_pinky_tip",
         ),
     },
+    # ── xarm7 + inspire ────────────────────────────────────────────────────
     "xarm7_inspire_left": {
         "urdf_path": os.path.join(ASSETS_DIR, "xarm7_inspire", "xarm7_inspire_left_hand.urdf"),
         "root_link": "link_base",
@@ -70,6 +72,7 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
             "pinky_tip",
         ),
     },
+    # ── xarm7 + ability ────────────────────────────────────────────────────
     "xarm7_ability_left": {
         "urdf_path": os.path.join(ASSETS_DIR, "xarm7_ability", "xarm7_ability_left_hand.urdf"),
         "root_link": "link_base",
@@ -94,6 +97,7 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
             "pinky_tip",
         ),
     },
+    # ── xarm7 + paxini (4-finger, ring_tip repeated for slot 5) ───────────
     "xarm7_paxini_left": {
         "urdf_path": os.path.join(ASSETS_DIR, "xarm7_paxini", "xarm7_pxdh13_left_hand_glb.urdf"),
         "root_link": "link_base",
@@ -116,6 +120,406 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
             "middle_tip",
             "ring_tip",
             "ring_tip",
+        ),
+    },
+    # ── xarm7 + allegro (4-finger: thumb=joint_12-15, index=0-3, mid=4-7, ring=8-11) ──
+    "xarm7_allegro_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_allegro", "xarm7_allegro_left_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "link_15.0_tip",
+            "link_3.0_tip",
+            "link_7.0_tip",
+            "link_11.0_tip",
+        ),
+    },
+    "xarm7_allegro_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_allegro", "xarm7_allegro_right_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "link_15.0_tip",
+            "link_3.0_tip",
+            "link_7.0_tip",
+            "link_11.0_tip",
+        ),
+    },
+    # ── xarm7 + shadow ─────────────────────────────────────────────────────
+    "xarm7_shadow_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_shadow", "xarm7_shadow_left_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "thtip",
+            "fftip",
+            "mftip",
+            "rftip",
+            "lftip",
+        ),
+    },
+    "xarm7_shadow_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_shadow", "xarm7_shadow_right_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "thtip",
+            "fftip",
+            "mftip",
+            "rftip",
+            "lftip",
+        ),
+    },
+    # ── xarm7 + leap ───────────────────────────────────────────────────────
+    "xarm7_leap_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_leap", "xarm7_leap_left_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "thumb_tip_head",
+            "index_tip_head",
+            "middle_tip_head",
+            "ring_tip_head",
+        ),
+    },
+    "xarm7_leap_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_leap", "xarm7_leap_right_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "thumb_tip_head",
+            "index_tip_head",
+            "middle_tip_head",
+            "ring_tip_head",
+        ),
+    },
+    # ── xarm7 + unitree dex3 ───────────────────────────────────────────────
+    "xarm7_unitree_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_unitree", "xarm7_unitree_dex3_left.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+        ),
+    },
+    "xarm7_unitree_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_unitree", "xarm7_unitree_dex3_right.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+        ),
+    },
+    # ── xarm7 + dclaw (symmetric 3-finger; left/right = mount-side convention) ──
+    "xarm7_dclaw_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_dclaw", "xarm7_dclaw.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "link_f1_head",
+            "link_f2_head",
+            "link_f3_head",
+        ),
+    },
+    "xarm7_dclaw_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_dclaw", "xarm7_dclaw.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "link_f1_head",
+            "link_f2_head",
+            "link_f3_head",
+        ),
+    },
+    # ── xarm7 + panda gripper (symmetric; left/right = mount-side convention) ──
+    "xarm7_panda_gripper_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_panda_gripper", "xarm7_panda_gripper.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "panda_leftfinger",
+            "panda_rightfinger",
+        ),
+    },
+    "xarm7_panda_gripper_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_panda_gripper", "xarm7_panda_gripper.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "panda_leftfinger",
+            "panda_rightfinger",
+        ),
+    },
+    # ── xarm7 + umi gripper (symmetric; left/right = mount-side convention) ──
+    "xarm7_umi_gripper_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_umi_gripper", "xarm7_umi_gripper.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "left_finger_holder",
+            "right_finger_holder",
+        ),
+    },
+    "xarm7_umi_gripper_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_umi_gripper", "xarm7_umi_gripper.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "left_finger_holder",
+            "right_finger_holder",
+        ),
+    },
+    # ── standalone xhand ───────────────────────────────────────────────────
+    "xhand_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xhand", "xhand_left.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "left_hand_thumb_rota_tip",
+            "left_hand_index_rota_tip",
+            "left_hand_mid_tip",
+            "left_hand_ring_tip",
+            "left_hand_pinky_tip",
+        ),
+    },
+    "xhand_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xhand", "xhand_right.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "right_hand_thumb_rota_tip",
+            "right_hand_index_rota_tip",
+            "right_hand_mid_tip",
+            "right_hand_ring_tip",
+            "right_hand_pinky_tip",
+        ),
+    },
+    # ── standalone inspire ─────────────────────────────────────────────────
+    "inspire_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "inspire_hand", "inspire_hand_left.urdf"),
+        "root_link": "base",
+        "wrist_link": "base",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+            "ring_tip",
+            "pinky_tip",
+        ),
+    },
+    "inspire_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "inspire_hand", "inspire_hand_right.urdf"),
+        "root_link": "base",
+        "wrist_link": "base",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+            "ring_tip",
+            "pinky_tip",
+        ),
+    },
+    # ── standalone ability ─────────────────────────────────────────────────
+    "ability_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "ability_hand", "ability_hand_left.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+            "ring_tip",
+            "pinky_tip",
+        ),
+    },
+    "ability_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "ability_hand", "ability_hand_right.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+            "ring_tip",
+            "pinky_tip",
+        ),
+    },
+    # ── standalone paxini (4-finger) ───────────────────────────────────────
+    "paxini_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "paxini", "dexh13_hand_left_description.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+            "ring_tip",
+        ),
+    },
+    "paxini_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "paxini", "dexh13_hand_right_description.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+            "ring_tip",
+        ),
+    },
+    # ── standalone allegro (4-finger: thumb=joint_12-15, index=0-3, mid=4-7, ring=8-11) ──
+    "allegro_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "allegro", "allegro_hand_left.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "link_15.0_tip",
+            "link_3.0_tip",
+            "link_7.0_tip",
+            "link_11.0_tip",
+        ),
+    },
+    "allegro_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "allegro", "allegro_hand_right.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "link_15.0_tip",
+            "link_3.0_tip",
+            "link_7.0_tip",
+            "link_11.0_tip",
+        ),
+    },
+    # ── standalone shadow (root=world, wrist tracked at 'wrist' link) ──────
+    "shadow_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "shadow_hand", "shadow_hand_left.urdf"),
+        "root_link": "world",
+        "wrist_link": "wrist",
+        "tip_links": (
+            "thtip",
+            "fftip",
+            "mftip",
+            "rftip",
+            "lftip",
+        ),
+    },
+    "shadow_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "shadow_hand", "shadow_hand_right.urdf"),
+        "root_link": "world",
+        "wrist_link": "wrist",
+        "tip_links": (
+            "thtip",
+            "fftip",
+            "mftip",
+            "rftip",
+            "lftip",
+        ),
+    },
+    # ── standalone leap (4-finger) ─────────────────────────────────────────
+    "leap_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "leap_hand", "leap_hand_left.urdf"),
+        "root_link": "base",
+        "wrist_link": "base",
+        "tip_links": (
+            "thumb_tip_head",
+            "index_tip_head",
+            "middle_tip_head",
+            "ring_tip_head",
+        ),
+    },
+    "leap_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "leap_hand", "leap_hand_right.urdf"),
+        "root_link": "base",
+        "wrist_link": "base",
+        "tip_links": (
+            "thumb_tip_head",
+            "index_tip_head",
+            "middle_tip_head",
+            "ring_tip_head",
+        ),
+    },
+    # ── standalone unitree dex3 (3-finger) ─────────────────────────────────
+    "unitree_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "unitree_hand", "unitree_dex3_left.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+        ),
+    },
+    "unitree_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "unitree_hand", "unitree_dex3_right.urdf"),
+        "root_link": "base_link",
+        "wrist_link": "base_link",
+        "tip_links": (
+            "thumb_tip",
+            "index_tip",
+            "middle_tip",
+        ),
+    },
+    # ── standalone dclaw (symmetric 3-finger; left/right = mount-side convention) ──
+    "dclaw_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "dclaw", "dclaw_gripper_glb.urdf"),
+        "root_link": "base",
+        "wrist_link": "base",
+        "tip_links": (
+            "link_f1_head",
+            "link_f2_head",
+            "link_f3_head",
+        ),
+    },
+    "dclaw_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "dclaw", "dclaw_gripper_glb.urdf"),
+        "root_link": "base",
+        "wrist_link": "base",
+        "tip_links": (
+            "link_f1_head",
+            "link_f2_head",
+            "link_f3_head",
+        ),
+    },
+    # ── standalone panda gripper (symmetric; left/right = mount-side convention) ──
+    "panda_gripper_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "panda_gripper", "panda_gripper_glb.urdf"),
+        "root_link": "panda_hand",
+        "wrist_link": "panda_hand",
+        "tip_links": (
+            "panda_leftfinger",
+            "panda_rightfinger",
+        ),
+    },
+    "panda_gripper_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "panda_gripper", "panda_gripper_glb.urdf"),
+        "root_link": "panda_hand",
+        "wrist_link": "panda_hand",
+        "tip_links": (
+            "panda_leftfinger",
+            "panda_rightfinger",
+        ),
+    },
+    # ── standalone umi gripper (symmetric; left/right = mount-side convention) ──
+    "umi_gripper_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "umi_gripper", "umi_gripper.urdf"),
+        "root_link": "world",
+        "wrist_link": "world",
+        "tip_links": (
+            "left_finger_holder",
+            "right_finger_holder",
+        ),
+    },
+    "umi_gripper_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "umi_gripper", "umi_gripper.urdf"),
+        "root_link": "world",
+        "wrist_link": "world",
+        "tip_links": (
+            "left_finger_holder",
+            "right_finger_holder",
         ),
     },
 }
