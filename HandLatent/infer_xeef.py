@@ -339,9 +339,9 @@ def main() -> None:
     parser.add_argument(
         "--ckpt",
         type=str,
-        default="Checkpoints/20260311_225425/checkpoint_epoch_1000.pt",
+        # default="Checkpoints/best_baseline(init)/checkpoint_epoch_1000.pt",
     )
-    parser.add_argument("--data", type=str, default="Dataset/demo.npz")
+    parser.add_argument("--data", type=str, default="Dataset/episode_38.npz")
     parser.add_argument(
         "--side", type=str, default="both", choices=("right", "left", "both")
     )
@@ -353,9 +353,13 @@ def main() -> None:
         for side in sides
         for hand_name in (
             f"xarm7_xhand_{side}",
-            f"xarm7_ability_{side}",
+            # f"xarm7_ability_{side}",
             f"xarm7_inspire_{side}",
-            f"xarm7_paxini_{side}",
+            # f"xarm7_paxini_{side}",
+            # f"xarm7_allegro_{side}",
+            f"xarm7_unitree_{side}",
+            # f"xarm7_umi_gripper_{side}",
+            f"xarm7_panda_gripper_{side}",
         )
     ]
 
@@ -378,9 +382,16 @@ def main() -> None:
             source_hand = f"xarm7_inspire_{side}"
             target_hands = [
                 f"xarm7_xhand_{side}",
-                f"xarm7_ability_{side}",
+                # f"xarm7_ability_{side}",
                 f"xarm7_inspire_{side}",
-                f"xarm7_paxini_{side}",
+                # f"xarm7_paxini_{side}",
+                # f"xarm7_shadow_{side}",
+                # f"xarm7_allegro_{side}",
+                # f"xarm7_leap_{side}",
+                f"xarm7_unitree_{side}",
+                # f"xarm7_dclaw_{side}",
+                f"xarm7_panda_gripper_{side}",
+                # f"xarm7_umi_gripper_{side}",
             ]
             source_qpos = torch.as_tensor(dataset[f"{side}_qpos"], dtype=torch.float32)
             source_norm = trainer.normalized_qpos(source_hand, source_qpos).to(

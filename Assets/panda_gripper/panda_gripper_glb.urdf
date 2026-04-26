@@ -122,4 +122,16 @@
     <mimic joint="panda_finger_joint1" multiplier="1" offset="0"/>
     <dynamics damping="0.3"/>
   </joint>
+  <link name="panda_leftfinger_tip"/>
+  <joint name="panda_leftfinger_tip_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0.00758 0.04525"/>
+    <parent link="panda_leftfinger"/>
+    <child link="panda_leftfinger_tip"/>
+  </joint>
+  <link name="panda_rightfinger_tip"/>
+  <joint name="panda_rightfinger_tip_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 -0.00758 0.04525"/>
+    <parent link="panda_rightfinger"/>
+    <child link="panda_rightfinger_tip"/>
+  </joint>
 </robot>

@@ -241,8 +241,8 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
         "root_link": "link_base",
         "wrist_link": "link7",
         "tip_links": (
-            "panda_leftfinger",
-            "panda_rightfinger",
+            "panda_leftfinger_tip",
+            "panda_rightfinger_tip",
         ),
     },
     "xarm7_panda_gripper_right": {
@@ -250,8 +250,8 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
         "root_link": "link_base",
         "wrist_link": "link7",
         "tip_links": (
-            "panda_leftfinger",
-            "panda_rightfinger",
+            "panda_leftfinger_tip",
+            "panda_rightfinger_tip",
         ),
     },
     # ── xarm7 + umi gripper (symmetric; left/right = mount-side convention) ──
@@ -490,8 +490,8 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
         "root_link": "panda_hand",
         "wrist_link": "panda_hand",
         "tip_links": (
-            "panda_leftfinger",
-            "panda_rightfinger",
+            "panda_leftfinger_tip",
+            "panda_rightfinger_tip",
         ),
     },
     "panda_gripper_right": {
@@ -499,8 +499,8 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
         "root_link": "panda_hand",
         "wrist_link": "panda_hand",
         "tip_links": (
-            "panda_leftfinger",
-            "panda_rightfinger",
+            "panda_leftfinger_tip",
+            "panda_rightfinger_tip",
         ),
     },
     # ── standalone umi gripper (symmetric; left/right = mount-side convention) ──
@@ -813,6 +813,21 @@ class HandKinematicsModel:
                     self.dof_joints.append(joint.name)
                     dof_lowers.append(lower if lower is not None else 0.0)
                     dof_uppers.append(upper if upper is not None else 0.0)
+            elif joint.type == "prismatic":
+                axis_list = joint.axis if joint.axis is not None else [1.0, 0.0, 0.0]
+                axis_tensor = torch.tensor(axis_list, dtype=torch.float32)
+                axis_tensor = axis_tensor / torch.linalg.norm(axis_tensor)
+                if joint.limit is not None:
+                    lower = float(joint.limit.lower)
+                    upper = float(joint.limit.upper)
+                if joint.mimic is not None:
+                    mimic_parent = joint.mimic.joint
+                    mimic_multiplier = float(joint.mimic.multiplier)
+                    mimic_offset = float(joint.mimic.offset)
+                else:
+                    self.dof_joints.append(joint.name)
+                    dof_lowers.append(lower if lower is not None else 0.0)
+                    dof_uppers.append(upper if upper is not None else 0.0)
             self.joint_specs[joint.name] = JointSpec(
                 name=joint.name,
                 parent=joint.parent,
@@ -923,12 +938,12 @@ class HandKinematicsModel:
         for index, joint_name in enumerate(self.dof_joints):
             angle_map[joint_name] = angles[:, index]
         for joint_name, spec in self.joint_specs.items():
-            if spec.kind == "revolute" and spec.mimic_parent is not None:
+            if spec.kind in ("revolute", "prismatic") and spec.mimic_parent is not None:
                 angle_map[joint_name] = (
                     angle_map[spec.mimic_parent] * spec.mimic_multiplier + spec.mimic_offset
                 )
         for joint_name, spec in self.joint_specs.items():
-            if spec.kind == "revolute" and joint_name in angle_map:
+            if spec.kind in ("revolute", "prismatic") and joint_name in angle_map:
                 lower_bound = float(spec.lower) if spec.lower is not None else float("-inf")
                 upper_bound = float(spec.upper) if spec.upper is not None else float("inf")
                 angle_map[joint_name] = torch.clamp(angle_map[joint_name], min=lower_bound, max=upper_bound)
@@ -993,6 +1008,10 @@ class HandKinematicsModel:
                 axis = spec.axis.to(dtype=dtype, device=device).unsqueeze(0).repeat(batch, 1)
                 angle = angles_map[joint_name].to(dtype=dtype, device=device)
                 joint_transform[:, :3, :3] = axis_angle_to_matrix(axis, angle)
+            elif spec.kind == "prismatic":
+                axis = spec.axis.to(dtype=dtype, device=device).unsqueeze(0).repeat(batch, 1)
+                displacement = angles_map[joint_name].to(dtype=dtype, device=device)
+                joint_transform[:, :3, 3] = axis * displacement.unsqueeze(-1)
             transforms[spec.child] = parent_transform @ origin @ joint_transform
         tips = torch.stack([transforms[tip][:, :3, 3] for tip in self.tip_links], dim=1)
         wrist = transforms[self.wrist_link]

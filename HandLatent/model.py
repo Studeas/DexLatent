@@ -67,6 +67,12 @@ class TrainingConfig:
         Exponential weighting coefficient with shape=().
     lambda_kl : float
         KL weight with shape=().
+    lambda_sem_dis : float
+        Semantic aperture loss weight (cross-morphology) with shape=().
+    lambda_sem_dir : float
+        Semantic direction loss weight (cross-morphology) with shape=().
+    semantic_weight_floor : float
+        Minimum semantic loss sample weight with shape=().
     pinch_pairs : Sequence[Tuple[int, int]], shape=(P, 2)
         Pinch fingertip index pairs.
     pinch_sampling_probability : float
@@ -95,16 +101,20 @@ class TrainingConfig:
     latent_dim_hand: int = 32
     hand_hidden_dims: Sequence[int] = (64, 128, 64)
     batch_size: int = 1024
-    num_steps: int = 10_000
+    num_steps: int = 15_000
     learning_rate: float = 2e-3
+    lr_min: float = 1e-5
     rec_hand_weight: float = 1.0
     arm_dof: int = 7
     lambda_dis: float = 2000.0
-    lambda_dir: float = 5.0
+    lambda_dir: float = 50.0
     lambda_dis_exp: float = 12.0
-    lambda_kl: float = 0.0
+    lambda_kl: float = 0.0001
+    lambda_sem_dis: float = 1000.0
+    lambda_sem_dir: float = 50.0
+    semantic_weight_floor: float = 0.25
     pinch_pairs: Sequence[Tuple[int, int]] = field(default_factory=lambda: list(PINCH_PAIR_DEFAULTS))
-    pinch_sampling_probability: float = 0.5
+    pinch_sampling_probability: float = 0.6
     pinch_offset: Tuple[float, float, float] = (0.07, 0.0, -0.08)
     pinch_template_target_noise_std: float = 0.01
     pinch_template_joint_noise_std: float = 0.01
@@ -416,6 +426,82 @@ def compute_pinch_loss(
     return distance_term, direction_term, weight
 
 
+def compute_semantic_grasp_loss(
+    source_tips: torch.Tensor,
+    target_tips: torch.Tensor,
+    lambda_dis_exp: float,
+    semantic_weight_floor: float = 0.25,
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Morphology-agnostic aperture and direction loss.
+
+    Multi-finger hands compare shared thumb-opposer pairs.  Two-tip grippers
+    compare their single aperture to the average source/target hand aperture.
+
+    Parameters
+    ----------
+    source_tips : torch.Tensor, shape=(B, F_src, 3), dtype=float32
+        Source fingertip coordinates.
+    target_tips : torch.Tensor, shape=(B, F_tgt, 3), dtype=float32
+        Target fingertip coordinates.
+    lambda_dis_exp : float
+        Exponential weighting coefficient for source aperture with shape=().
+    semantic_weight_floor : float
+        Minimum exponential weight with shape=().
+
+    Returns
+    -------
+    tuple
+        - distance_term : torch.Tensor, shape=(B, P) or (B,), dtype=float32
+        - direction_term : torch.Tensor, shape=(B, P) or (B,), dtype=float32
+        - weight : torch.Tensor, shape=(B, P) or (B,), dtype=float32
+    """
+
+    if source_tips.shape[1] < 2 or target_tips.shape[1] < 2:
+        empty = torch.zeros(source_tips.shape[0], 0, device=source_tips.device, dtype=source_tips.dtype)
+        return empty, empty, empty
+
+    def hand_deltas(tips: torch.Tensor, pair_count: Optional[int] = None) -> torch.Tensor:
+        limit = tips.shape[1] if pair_count is None else min(tips.shape[1], pair_count + 1)
+        return tips[:, :1, :] - tips[:, 1:limit, :]
+
+    def gripper_delta(tips: torch.Tensor) -> torch.Tensor:
+        if tips.shape[1] == 2:
+            return tips[:, 0, :] - tips[:, 1, :]
+        deltas = hand_deltas(tips)
+        distances = torch.linalg.norm(deltas, dim=-1)
+        directions = F.normalize(deltas, dim=-1, eps=1.0e-6)
+        mean_distance = distances.mean(dim=1, keepdim=True)
+        mean_direction = F.normalize(directions.mean(dim=1), dim=-1, eps=1.0e-6)
+        return mean_direction * mean_distance
+
+    if source_tips.shape[1] == 2 or target_tips.shape[1] == 2:
+        delta_src = gripper_delta(source_tips)
+        delta_tgt = gripper_delta(target_tips)
+        sign_invariant_direction = True
+    else:
+        pair_count = min(source_tips.shape[1], target_tips.shape[1]) - 1
+        delta_src = hand_deltas(source_tips, pair_count=pair_count)
+        delta_tgt = hand_deltas(target_tips, pair_count=pair_count)
+        sign_invariant_direction = False
+
+    dist_src = torch.linalg.norm(delta_src, dim=-1)
+    dist_tgt = torch.linalg.norm(delta_tgt, dim=-1)
+    distance_term = torch.square(dist_tgt - dist_src)
+
+    src_dir = F.normalize(delta_src, dim=-1, eps=1.0e-6)
+    tgt_dir = F.normalize(delta_tgt, dim=-1, eps=1.0e-6)
+    direction_similarity = (src_dir * tgt_dir).sum(dim=-1)
+    if sign_invariant_direction:
+        direction_similarity = direction_similarity.abs()
+    direction_term = 1.0 - direction_similarity
+
+    weight = torch.clamp(
+        torch.exp(-lambda_dis_exp * dist_src),
+        min=max(0.0, float(semantic_weight_floor)),
+    )
+    return distance_term, direction_term, weight
+
+
 class CrossEmbodimentTrainer:
     """Trainer for multi-hand latent learning and retargeting.
 
@@ -464,6 +550,11 @@ class CrossEmbodimentTrainer:
         )
         self.autoencoders.to(self.config.device)
         self.optimizer = torch.optim.AdamW(list(self.autoencoders.parameters()), lr=self.config.learning_rate)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            self.optimizer,
+            T_max=self.config.num_steps,
+            eta_min=self.config.lr_min,
+        )
         self.checkpoint_root_dir = os.path.abspath(self.config.checkpoint_dir)
         os.makedirs(self.checkpoint_root_dir, exist_ok=True)
         self._pinch_templates: Dict[str, torch.Tensor] = {}
@@ -841,6 +932,32 @@ class CrossEmbodimentTrainer:
         self._pinch_pair_cache[cache_key] = filtered
         return filtered
 
+    @staticmethod
+    def _morphology_class(hand_name: str) -> str:
+        """Classify a hand name into a coarse morphology bucket.
+
+        Parameters
+        ----------
+        hand_name : str
+            Hand name with shape=().
+
+        Returns
+        -------
+        str
+            Morphology class key with shape=().
+        """
+
+        for token in ("panda_gripper", "umi_gripper"):
+            if token in hand_name:
+                return "gripper_2tip"
+        if "dclaw" in hand_name:
+            return "gripper_3tip"
+        if "unitree" in hand_name:
+            return "hand_3finger"
+        if "allegro" in hand_name or "leap" in hand_name:
+            return "hand_4finger"
+        return "hand_5finger"
+
     def step(self) -> Dict[str, float]:
         """Run one optimization step.
 
@@ -862,47 +979,64 @@ class CrossEmbodimentTrainer:
         source_tips: Dict[str, torch.Tensor] = {}
         hand_recon_loss = torch.tensor(0.0, device=self.config.device)
 
+        hand_recon_count = 0
         for name in self.hand_names:
             hand_input = batch_qpos[name]
             _, qpos_hand_gt = self._split_qpos(name, hand_input)
             latent_arm, latent_hand, _, qpos_hand_pred, hand_stats = self.autoencoders[name](hand_input)
             latents[name] = (latent_arm, latent_hand)
             latent_stats[name] = {"hand": hand_stats}
-            hand_recon_loss = hand_recon_loss + F.mse_loss(qpos_hand_pred, qpos_hand_gt)
+            # Skip reconstruction loss for 0-DOF hands (e.g. parallel grippers
+            # where all joints are prismatic): F.mse_loss on empty tensors returns NaN.
+            if qpos_hand_gt.numel() > 0:
+                hand_recon_loss = hand_recon_loss + F.mse_loss(qpos_hand_pred, qpos_hand_gt)
+                hand_recon_count += 1
             source_tips[name] = self.hand_models[name].forward(hand_input)
 
-        hand_recon_loss = hand_recon_loss / float(len(self.hand_names))
+        hand_recon_loss = hand_recon_loss / float(max(1, hand_recon_count))
         reconstruction_loss = hand_recon_loss * self.config.rec_hand_weight
 
         pinch_distance_total = torch.tensor(0.0, device=self.config.device)
         pinch_direction_total = torch.tensor(0.0, device=self.config.device)
         exp_weight_total = torch.tensor(0.0, device=self.config.device)
         pair_count = 0
+        sem_distance_total = torch.tensor(0.0, device=self.config.device)
+        sem_direction_total = torch.tensor(0.0, device=self.config.device)
+        sem_pair_count = 0
 
         for source_name in self.hand_names:
             source_fk = source_tips[source_name]
             latent_arm_source, latent_hand_source = latents[source_name]
+            src_class = self._morphology_class(source_name)
             for target_name in self.hand_names:
                 if target_name == source_name:
-                    continue
-                pinch_pairs = self.shared_pinch_pairs(source_name, target_name)
-                if len(pinch_pairs) == 0:
                     continue
                 target_arm_pred, target_hand_pred = self.autoencoders[target_name].decode_from_latents(
                     latent_arm_source,
                     latent_hand_source,
                 )
                 fk_hand = self.hand_models[target_name].forward(self._merge_qpos(target_arm_pred.detach(), target_hand_pred))
-                distance_term, direction_term, exp_weight = compute_pinch_loss(
-                    source_fk,
-                    fk_hand,
-                    pinch_pairs,
-                    self.config.lambda_dis_exp,
+
+                # Semantic loss: always applied for any embodiment pair.
+                sem_dis, sem_dir, sem_w = compute_semantic_grasp_loss(
+                    source_fk, fk_hand, self.config.lambda_dis_exp, self.config.semantic_weight_floor,
                 )
-                pair_count += 1
-                pinch_distance_total = pinch_distance_total + (distance_term * exp_weight).mean()
-                pinch_direction_total = pinch_direction_total + (direction_term * exp_weight).mean()
-                exp_weight_total = exp_weight_total + exp_weight.mean()
+                sem_distance_total = sem_distance_total + (sem_dis * sem_w).mean()
+                sem_direction_total = sem_direction_total + (sem_dir * sem_w).mean()
+                sem_pair_count += 1
+
+                # Detailed per-pair loss: only for same morphology class.
+                tgt_class = self._morphology_class(target_name)
+                if src_class == tgt_class:
+                    pinch_pairs = self.shared_pinch_pairs(source_name, target_name)
+                    if len(pinch_pairs) > 0:
+                        distance_term, direction_term, exp_weight = compute_pinch_loss(
+                            source_fk, fk_hand, pinch_pairs, self.config.lambda_dis_exp,
+                        )
+                        pair_count += 1
+                        pinch_distance_total = pinch_distance_total + (distance_term * exp_weight).mean()
+                        pinch_direction_total = pinch_direction_total + (direction_term * exp_weight).mean()
+                        exp_weight_total = exp_weight_total + exp_weight.mean()
 
         if pair_count > 0:
             pinch_distance = pinch_distance_total / float(pair_count)
@@ -912,6 +1046,13 @@ class CrossEmbodimentTrainer:
             pinch_distance = torch.tensor(0.0, device=self.config.device)
             pinch_direction = torch.tensor(0.0, device=self.config.device)
             exp_weight_mean = torch.tensor(0.0, device=self.config.device)
+
+        if sem_pair_count > 0:
+            sem_distance = sem_distance_total / float(sem_pair_count)
+            sem_direction = sem_direction_total / float(sem_pair_count)
+        else:
+            sem_distance = torch.tensor(0.0, device=self.config.device)
+            sem_direction = torch.tensor(0.0, device=self.config.device)
 
         kl_total = torch.tensor(0.0, device=self.config.device)
         component_count = 0
@@ -926,10 +1067,13 @@ class CrossEmbodimentTrainer:
             reconstruction_loss
             + self.config.lambda_dis * pinch_distance
             + self.config.lambda_dir * pinch_direction
+            + self.config.lambda_sem_dis * sem_distance
+            + self.config.lambda_sem_dir * sem_direction
             + self.config.lambda_kl * kl_loss
         )
         total_loss.backward()
         self.optimizer.step()
+        self.scheduler.step()
 
         return {
             "loss_total": float(total_loss.detach().cpu()),
@@ -937,6 +1081,8 @@ class CrossEmbodimentTrainer:
             "loss_rec_hand": float((hand_recon_loss * self.config.rec_hand_weight).detach().cpu()),
             "loss_pinch_dis": float(pinch_distance.detach().cpu()) * self.config.lambda_dis,
             "loss_pinch_dir": float(pinch_direction.detach().cpu()) * self.config.lambda_dir,
+            "loss_sem_dis": float(sem_distance.detach().cpu()) * self.config.lambda_sem_dis,
+            "loss_sem_dir": float(sem_direction.detach().cpu()) * self.config.lambda_sem_dir,
             "loss_kl": float(kl_loss.detach().cpu()) * self.config.lambda_kl,
             "exp_dis": float(exp_weight_mean.detach().cpu()),
         }
@@ -963,15 +1109,18 @@ class CrossEmbodimentTrainer:
         for step_index in range(self.config.num_steps):
             metrics = self.step()
             history.append(metrics)
+            current_lr = self.scheduler.get_last_lr()[0]
             print(
                 f"Step {step_index + 1:04d} | "
                 f"total={metrics['loss_total']:.4f} "
-                f"rec_total={metrics['loss_rec_total']:.4f} "
-                f"rec_hand={metrics['loss_rec_hand']:.4f} "
+                f"rec={metrics['loss_rec_hand']:.4f} "
+                f"sem_dis={metrics['loss_sem_dis']:.4f} "
+                f"sem_dir={metrics['loss_sem_dir']:.4f} "
                 f"pinch_dis={metrics['loss_pinch_dis']:.4f} "
                 f"pinch_dir={metrics['loss_pinch_dir']:.4f} "
-                f"exp_dis={metrics['exp_dis']:.4f} "
-                f"kl={metrics['loss_kl']:.4f}"
+                f"exp={metrics['exp_dis']:.4f} "
+                f"kl={metrics['loss_kl']:.4f} "
+                f"lr={current_lr:.2e}"
             )
             epoch_index = step_index + 1
             if self.config.checkpoint_interval > 0 and epoch_index % self.config.checkpoint_interval == 0:

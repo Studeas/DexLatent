@@ -2,3 +2,6 @@
 *.pyc
 *.sh
 Assets/paxini/meshes/*.glb
+
+docs/
+Checkpoints/

@@ -320,26 +320,19 @@ def pink_align_arm(
     target_rot_np = target_rotation.detach().to(device="cpu", dtype=torch.float64).numpy()
 
     fingertip_transforms = [configuration.get_transform_frame_to_world(tip_name) for tip_name in context.tip_links]
-    if pair_weights is None:
-        if len(pinch_pairs) > 0:
-            weights_np = np.ones(len(pinch_pairs), dtype=np.float64)
-        else:
-            weights_np = np.zeros(0, dtype=np.float64)
-    else:
-        weights_np = pair_weights.detach().to(device="cpu", dtype=torch.float64).numpy()
 
-    if weights_np.size > 0:
-        weight_sum = float(np.sum(weights_np))
-        weights_np = weights_np / weight_sum if weight_sum > 1.0e-8 else np.full_like(weights_np, 1.0 / max(1, weights_np.size))
-
-    if len(pinch_pairs) == 0:
+    # Semantic alignment: midpoint of virtual thumb (tips[0]) and virtual finger
+    # centroid (mean of tips[1:]).  Consistent with training-time semantic loss
+    # and works for any tip count >= 2 regardless of embodiment morphology.
+    # pinch_pairs and pair_weights are kept in the signature for compatibility
+    # but are no longer used for the alignment computation.
+    if len(context.tip_links) < 2:
         pinch_world = wrist_current.translation.copy()
     else:
-        pinch_world = np.zeros(3, dtype=np.float64)
-        for weight, (thumb_idx, finger_idx) in zip(weights_np, pinch_pairs):
-            thumb_pos = fingertip_transforms[thumb_idx].translation
-            finger_pos = fingertip_transforms[finger_idx].translation
-            pinch_world += weight * 0.5 * (thumb_pos + finger_pos)
+        thumb_pos = fingertip_transforms[0].translation
+        other_positions = [fingertip_transforms[i].translation for i in range(1, len(context.tip_links))]
+        virtual_fingers = np.mean(other_positions, axis=0)
+        pinch_world = 0.5 * (thumb_pos + virtual_fingers)
 
     wrist_target.translation = wrist_current.translation + (target_align_np - pinch_world)
     wrist_target.rotation = target_rot_np
