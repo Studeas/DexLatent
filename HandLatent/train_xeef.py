@@ -5,6 +5,9 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+from dataclasses import asdict
+from datetime import datetime
+from typing import Any, Dict
 
 import torch
 
@@ -44,6 +47,12 @@ def main() -> None:
     parser.add_argument("--pinch_sampling_probability", type=float, default=0.6)
     parser.add_argument("--semantic_weight_floor", type=float, default=0.25)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--swanlab", action="store_true", help="Enable SwanLab metric logging.")
+    parser.add_argument("--swanlab_project", type=str, default="DexLatent")
+    parser.add_argument("--swanlab_workspace", type=str, default=None)
+    parser.add_argument("--swanlab_experiment", type=str, default=None)
+    parser.add_argument("--swanlab_mode", type=str, default=None, choices=("cloud", "local", "offline", "disabled"))
+    parser.add_argument("--swanlab_logdir", type=str, default="swanlog")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -92,7 +101,45 @@ def main() -> None:
         semantic_weight_floor=args.semantic_weight_floor,
     )
     trainer = CrossEmbodimentTrainer(hand_names, config)
-    trainer.train()
+
+    swanlab_run = None
+    log_callback = None
+    if args.swanlab:
+        try:
+            import swanlab
+        except ImportError as exc:
+            raise RuntimeError(
+                "SwanLab logging requested but swanlab is not installed. "
+                "Install it or run without --swanlab."
+            ) from exc
+
+        experiment_name = args.swanlab_experiment or f"train_xeef_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        swanlab_config: Dict[str, Any] = {
+            "script": "HandLatent/train_xeef.py",
+            "hand_names": hand_names,
+            "seed": args.seed,
+            "training_config": {
+                key: str(value) if isinstance(value, torch.device) else value
+                for key, value in asdict(config).items()
+            },
+        }
+        swanlab_run = swanlab.init(
+            project=args.swanlab_project,
+            workspace=args.swanlab_workspace,
+            experiment_name=experiment_name,
+            config=swanlab_config,
+            logdir=args.swanlab_logdir,
+            mode=args.swanlab_mode,
+        )
+
+        def log_callback(step: int, metrics: Dict[str, float]) -> None:
+            swanlab.log(metrics, step=step)
+
+    try:
+        trainer.train(log_callback=log_callback)
+    finally:
+        if swanlab_run is not None:
+            swanlab.finish()
 
 
 if __name__ == "__main__":

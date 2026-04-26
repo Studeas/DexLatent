@@ -6,7 +6,7 @@ import math
 import os
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 import torch
 from torch import nn
@@ -1087,7 +1087,7 @@ class CrossEmbodimentTrainer:
             "exp_dis": float(exp_weight_mean.detach().cpu()),
         }
 
-    def train(self) -> List[Dict[str, float]]:
+    def train(self, log_callback: Optional[Callable[[int, Dict[str, float]], None]] = None) -> List[Dict[str, float]]:
         """Run full training loop and save periodic checkpoints.
 
         Parameters
@@ -1110,6 +1110,10 @@ class CrossEmbodimentTrainer:
             metrics = self.step()
             history.append(metrics)
             current_lr = self.scheduler.get_last_lr()[0]
+            metrics_with_lr = dict(metrics)
+            metrics_with_lr["learning_rate"] = float(current_lr)
+            if log_callback is not None:
+                log_callback(step_index + 1, metrics_with_lr)
             print(
                 f"Step {step_index + 1:04d} | "
                 f"total={metrics['loss_total']:.4f} "
