@@ -47,7 +47,7 @@ def main() -> None:
     parser.add_argument("--pinch_sampling_probability", type=float, default=0.6)
     parser.add_argument("--semantic_weight_floor", type=float, default=0.25)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--swanlab", action="store_true", help="Enable SwanLab metric logging.")
+    parser.add_argument("--swanlab", action=argparse.BooleanOptionalAction, default=True, help="Enable SwanLab metric logging.")
     parser.add_argument("--swanlab_project", type=str, default="DexLatent")
     parser.add_argument("--swanlab_workspace", type=str, default=None)
     parser.add_argument("--swanlab_experiment", type=str, default=None)
@@ -56,6 +56,16 @@ def main() -> None:
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
+    print("cuda available:", torch.cuda.is_available())
+    print("cuda device count:", torch.cuda.device_count())
+
+    if torch.cuda.is_available():
+        print("current device:", torch.cuda.current_device())
+        print("device name:", torch.cuda.get_device_name(0))
+        print("allocated MB:", torch.cuda.memory_allocated(0) / 1024 / 1024)
+    else:
+        print("using CPU")
+
     hand_names = [
         # ── 五指手 (right) ───────────────────────────────────────────
         "xarm7_xhand_right",
@@ -69,7 +79,7 @@ def main() -> None:
         # ── 三指手 (right) ───────────────────────────────────────────
         "xarm7_unitree_right",
         # ── 夹爪 symmetric (right 安装侧) ────────────────────────────
-        "xarm7_dclaw_right",
+        "xarm7_dclaw_right", # 构型相差太大，难以训练
         "xarm7_panda_gripper_right",
         "xarm7_umi_gripper_right",
         # ── 双臂左侧：按需解注释 ─────────────────────────────────────

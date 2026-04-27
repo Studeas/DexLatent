@@ -357,7 +357,9 @@ def main() -> None:
             f"xarm7_inspire_{side}",
             # f"xarm7_paxini_{side}",
             # f"xarm7_allegro_{side}",
+            # f"xarm7_leap_{side}",
             f"xarm7_unitree_{side}",
+            # f"xarm7_dclaw_{side}",
             # f"xarm7_umi_gripper_{side}",
             f"xarm7_panda_gripper_{side}",
         )
@@ -386,12 +388,12 @@ def main() -> None:
                 f"xarm7_inspire_{side}",
                 # f"xarm7_paxini_{side}",
                 # f"xarm7_shadow_{side}",
-                # f"xarm7_allegro_{side}",
-                # f"xarm7_leap_{side}",
+                # f"xarm7_allegro_{side}", # 可视化问题
+                # f"xarm7_leap_{side}", # 可视化问题
                 f"xarm7_unitree_{side}",
-                # f"xarm7_dclaw_{side}",
+                # f"xarm7_dclaw_{side}", # 构型相差太大，难以
                 f"xarm7_panda_gripper_{side}",
-                # f"xarm7_umi_gripper_{side}",
+                # f"xarm7_umi_gripper_{side}", # 可视化问题
             ]
             source_qpos = torch.as_tensor(dataset[f"{side}_qpos"], dtype=torch.float32)
             source_norm = trainer.normalized_qpos(source_hand, source_qpos).to(
