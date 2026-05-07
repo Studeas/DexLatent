@@ -10,6 +10,15 @@ Official implementation of DexLatent for the paper **XL-VLA: Cross-Hand Latent R
 - [x] `2026.02.27`: Released code and [project website](https://xl-vla.github.io).
 - [x] `2026.02.22`: Accepted to CVPR 2026.
 
+## Start Training
+
+```bash
+uv sync && uv pip install swanlab
+
+uv run python -m HandLatent.train_xeef
+```
+
+
 ## Inference and Visualization
 
 Run with our pretrained checkpoint:
