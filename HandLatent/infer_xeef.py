@@ -352,6 +352,7 @@ def main() -> None:
         hand_name
         for side in sides
         for hand_name in (
+            f"xarm7_xhand1pro_{side}",
             f"xarm7_xhand_{side}",
             # f"xarm7_ability_{side}",
             f"xarm7_inspire_{side}",
@@ -381,8 +382,10 @@ def main() -> None:
 
     with np.load(Path(args.data).expanduser().resolve()) as dataset:
         for side in sides:
+            # source_hand = f"xarm7_inspire_{side}"
             source_hand = f"xarm7_inspire_{side}"
             target_hands = [
+                f"xarm7_xhand1pro_{side}",
                 f"xarm7_xhand_{side}",
                 # f"xarm7_ability_{side}",
                 f"xarm7_inspire_{side}",

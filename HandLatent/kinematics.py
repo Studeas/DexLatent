@@ -22,6 +22,31 @@ PROJECT_ROOT: str = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."
 ASSETS_DIR: str = os.path.join(PROJECT_ROOT, "Assets")
 
 HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
+    # ── xarm7 + xhand1pro ─────────────────────────────────────────────────
+    "xarm7_xhand1pro_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_xhand1pro", "xarm7_xhand1pro_left_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "left_hand_thumb_rota_link5",
+            "left_hand_index_rota_link5",
+            "left_hand_mid_rota_link5",
+            "left_hand_ring_rota_link5",
+            "left_hand_pinky_rota_link5",
+        ),
+    },
+    "xarm7_xhand1pro_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xarm7_xhand1pro", "xarm7_xhand1pro_right_hand.urdf"),
+        "root_link": "link_base",
+        "wrist_link": "link7",
+        "tip_links": (
+            "right_hand_thumb_rota_link5",
+            "right_hand_index_rota_link5",
+            "right_hand_mid_rota_link5",
+            "right_hand_ring_rota_link5",
+            "right_hand_pinky_rota_link5",
+        ),
+    },
     # ── xarm7 + xhand ──────────────────────────────────────────────────────
     "xarm7_xhand_left": {
         "urdf_path": os.path.join(ASSETS_DIR, "xarm7_xhand", "xarm7_xhand_left_hand.urdf"),
@@ -296,6 +321,31 @@ HAND_CONFIGS: Dict[str, Dict[str, Sequence[str] | str]] = {
             "right_hand_mid_tip",
             "right_hand_ring_tip",
             "right_hand_pinky_tip",
+        ),
+    },
+    # ── standalone xhand1pro ──────────────────────────────────────────────
+    "xhand1pro_left": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xhand1pro", "xhand_left", "urdf", "xhand_left.urdf"),
+        "root_link": "left_hand_link",
+        "wrist_link": "left_hand_link",
+        "tip_links": (
+            "left_hand_thumb_rota_link5",
+            "left_hand_index_rota_link5",
+            "left_hand_mid_rota_link5",
+            "left_hand_ring_rota_link5",
+            "left_hand_pinky_rota_link5",
+        ),
+    },
+    "xhand1pro_right": {
+        "urdf_path": os.path.join(ASSETS_DIR, "xhand1pro", "xhand_right", "urdf", "xhand_right.urdf"),
+        "root_link": "right_hand_link",
+        "wrist_link": "right_hand_link",
+        "tip_links": (
+            "right_hand_thumb_rota_link5",
+            "right_hand_index_rota_link5",
+            "right_hand_mid_rota_link5",
+            "right_hand_ring_rota_link5",
+            "right_hand_pinky_rota_link5",
         ),
     },
     # ── standalone inspire ─────────────────────────────────────────────────

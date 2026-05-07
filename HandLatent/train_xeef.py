@@ -68,21 +68,23 @@ def main() -> None:
 
     hand_names = [
         # ── 五指手 (right) ───────────────────────────────────────────
+        "xarm7_xhand1pro_right",
         "xarm7_xhand_right",
-        "xarm7_ability_right",
+        # "xarm7_ability_right",
         "xarm7_inspire_right",
-        "xarm7_paxini_right",
+        # "xarm7_paxini_right",
         # "xarm7_shadow_right",
         # ── 四指手 (right) ───────────────────────────────────────────
-        "xarm7_allegro_right",
-        "xarm7_leap_right",
+        # "xarm7_allegro_right",
+        # "xarm7_leap_right",
         # ── 三指手 (right) ───────────────────────────────────────────
         "xarm7_unitree_right",
         # ── 夹爪 symmetric (right 安装侧) ────────────────────────────
-        "xarm7_dclaw_right", # 构型相差太大，难以训练
+        # "xarm7_dclaw_right", # 构型相差太大，难以训练
         "xarm7_panda_gripper_right",
-        "xarm7_umi_gripper_right",
+        # "xarm7_umi_gripper_right",
         # ── 双臂左侧：按需解注释 ─────────────────────────────────────
+        # "xarm7_xhand1pro_left",
         # "xarm7_xhand_left",
         # "xarm7_ability_left",
         # "xarm7_inspire_left",
